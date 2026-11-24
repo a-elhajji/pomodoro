@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f4">
+  <meta name="description" content="A calm, simple Pomodoro timer for focused study and restful breaks.">
+  <title>Still — a little space to focus</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f7f7f4; color: #222b27; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #98b39c; outline-offset: 3px; }
+    .wrap { max-width: 1120px; padding: 0 36px; margin: auto; }
+    header { height: 98px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { font-size: 27px; font-weight: 760; letter-spacing: -.07em; }
+    .brand span { color: #7d9b80; }
+    .header-note { font-size: 14px; color: #8a918a; font-weight: 500; }
+    main { padding-top: 58px; padding-bottom: 100px; }
+    .intro { text-align: center; }
+    .eyebrow { color: #6f9073; font-size: 13px; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 18px; }
+    h1 { font-size: clamp(35px, 5vw, 58px); line-height: 1.08; letter-spacing: -.065em; margin: 0; font-weight: 700; }
+    .subtitle { color: #828a82; margin: 18px auto 0; font-size: 17px; line-height: 1.6; }
+    .timer-card { width: min(100%, 650px); margin: 48px auto 0; background: #fff; border: 1px solid #ebeee9; border-radius: 30px; box-shadow: 0 22px 70px rgba(38, 55, 40, .055); padding: 35px 32px 32px; text-align: center; }
+    .tabs { display: flex; align-items: center; width: max-content; max-width: 100%; gap: 5px; margin: auto; padding: 5px; border-radius: 100px; background: #f3f5f1; }
+    .tab { border: 0; background: transparent; color: #848e83; border-radius: 100px; padding: 11px 21px; font-weight: 650; font-size: 14px; transition: background .2s, color .2s, box-shadow .2s; }
+    .tab.active { background: #fff; color: #345a3d; box-shadow: 0 2px 9px #263e2614; }
+    .dial { width: min(300px, 72vw); aspect-ratio: 1; margin: 35px auto 26px; border-radius: 50%; padding: 11px; background: conic-gradient(#81a586 0deg, #edf1eb 0deg); transition: background .15s linear; }
+    .dial-inner { height: 100%; border-radius: 50%; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .session-label { color: #819080; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 5px; }
+    .time { font-size: clamp(66px, 11vw, 83px); line-height: 1.22; font-weight: 680; letter-spacing: -.075em; font-variant-numeric: tabular-nums; }
+    .state { color: #939c91; font-size: 14px; margin-top: 3px; }
+    .actions { display: flex; justify-content: center; align-items: center; gap: 11px; }
+    .primary { background: #345b40; color: white; min-width: 177px; border: 1px solid #345b40; border-radius: 12px; min-height: 51px; font-weight: 670; font-size: 15px; box-shadow: 0 5px 13px #345b4024; }
+    .primary:hover { background: #294d34; }
+    .secondary { border: 1px solid #e6ebe4; background: white; color: #526754; border-radius: 12px; min-height: 51px; padding: 0 20px; font-weight: 650; font-size: 14px; }
+    .secondary:hover { background: #f7f9f6; }
+    .task { color: #888f87; margin: 25px 0 0; font-size: 14px; }
+    .settings { width: min(100%, 650px); margin: 22px auto 0; background: #fff; border: 1px solid #ebeee9; border-radius: 23px; padding: 26px 31px 27px; }
+    .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+    h2 { font-size: 16px; letter-spacing: -.02em; margin: 0; }
+    .settings-hint { color: #a0a79e; font-size: 13px; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .field { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #f7f8f5; border-radius: 13px; padding: 12px 14px; }
+    .field label { color: #58665a; font-size: 14px; font-weight: 600; }
+    .number-wrap { display: flex; align-items: center; gap: 5px; color: #929c91; font-size: 13px; }
+    input[type=number] { width: 41px; padding: 4px 0; border: 0; background: transparent; text-align: right; color: #263c2c; font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; appearance: textfield; -moz-appearance: textfield; }
+    input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .notify-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; border-top: 1px solid #eff1ed; margin-top: 22px; padding-top: 21px; }
+    .notify-copy { font-size: 14px; font-weight: 600; color: #58665a; }
+    .notify-copy small { display: block; color: #9ba49b; font-size: 12px; font-weight: 450; margin-top: 3px; }
+    .toggle { width: 45px; height: 27px; border: 0; background: #dce3db; border-radius: 100px; position: relative; flex: none; transition: background .2s; }
+    .toggle::before { content: ""; position: absolute; left: 4px; top: 4px; width: 19px; height: 19px; border-radius: 50%; background: white; box-shadow: 0 1px 3px #0002; transition: transform .2s; }
+    .toggle[aria-checked=true] { background: #65966d; }
+    .toggle[aria-checked=true]::before { transform: translateX(18px); }
+    .footer { text-align: center; color: #a2a9a0; font-size: 13px; margin-top: 40px; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 20px); background: #263c2c; color: white; border-radius: 12px; padding: 13px 18px; font-size: 14px; box-shadow: 0 12px 35px #263c2c33; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 5; max-width: min(420px, calc(100vw - 28px)); text-align: center; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    @media (max-width: 600px) { .wrap { padding: 0 18px; } header { height: 75px; } .header-note { display: none; } main { padding-top: 35px; padding-bottom: 55px; } .subtitle { font-size: 15px; } .timer-card { margin-top: 35px; padding: 25px 15px 28px; border-radius: 24px; } .dial { margin-top: 28px; } .settings { padding: 23px 20px; } .settings-hint { display: none; } .fields { grid-template-columns: 1fr; gap: 10px; } .footer { margin-top: 32px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before { transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header><div class="brand">still<span>.</span></div><div class="header-note">A little space to focus</div></header>
+    <main>
+      <div class="intro"><p class="eyebrow">Your study companion</p><h1>One thing at a time.</h1><p class="subtitle">Focus for a while. Take a breath. Do it again.</p></div>
+      <section class="timer-card" aria-label="Study timer">
+        <div class="tabs" role="group" aria-label="Timer mode"><button class="tab active" id="focusTab" type="button" aria-pressed="true">Focus time</button><button class="tab" id="breakTab" type="button" aria-pressed="false">Short break</button></div>
+        <div class="dial" id="dial"><div class="dial-inner"><div class="session-label" id="sessionLabel">Focus session</div><div class="time" id="time" role="timer" aria-label="Time remaining">25:00</div><div class="state" id="state">Ready when you are</div></div></div>
+        <div class="actions"><button id="start" class="primary" type="button">Start focus</button><button id="reset" class="secondary" type="button">Reset</button></div>
+        <p class="task" id="sessionCount">0 focus sessions completed</p>
+      </section>
+      <section class="settings" aria-label="Timer settings">
+        <div class="settings-header"><h2>Make it yours</h2><span class="settings-hint">Set your own rhythm</span></div>
+        <div class="fields"><div class="field"><label for="focusInput">Focus time</label><div class="number-wrap"><input id="focusInput" type="number" min="1" max="180" value="25" inputmode="numeric"> min</div></div><div class="field"><label for="breakInput">Break time</label><div class="number-wrap"><input id="breakInput" type="number" min="1" max="60" value="5" inputmode="numeric"> min</div></div></div>
+        <div class="notify-row"><div class="notify-copy">Desktop notifications<small>Get a gentle nudge when time is up</small></div><button id="notifications" class="toggle" type="button" role="switch" aria-label="Desktop notifications" aria-checked="false"></button></div>
+      </section>
+      <p class="footer">Small steps add up. You’ve got this.</p>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (() => {
+      const $ = id => document.getElementById(id);
+      const focusInput = $('focusInput'), breakInput = $('breakInput'), time = $('time'), dial = $('dial');
+      const saved = (() => { try { return JSON.parse(localStorage.getItem('still-settings')) || {}; } catch { return {}; } })();
+      const clamp = (value, min, max, fallback) => { const n = Number(value); return Number.isFinite(n) && Number.isInteger(n) && n >= min && n <= max ? n : fallback; };
+      let lengths = { focus: clamp(saved.focus, 1, 180, 25), break: clamp(saved.break, 1, 60, 5) };
+      let mode = 'focus', remaining = lengths.focus * 60, deadline = null, ticker = null, running = false;
+      let sessions = clamp(saved.sessions, 0, 999999, 0);
+      let notify = saved.notify === true && 'Notification' in window && Notification.permission === 'granted';
+      focusInput.value = lengths.focus; breakInput.value = lengths.break;
+      $('notifications').setAttribute('aria-checked', String(notify));
+      function save() { try { localStorage.setItem('still-settings', JSON.stringify({ ...lengths, sessions, notify })); } catch {} }
+      let toastTimer;
+      function toast(message) { const el = $('toast'); el.textContent = message; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 4500); }
+      function render() {
+        const full = lengths[mode] * 60;
+        const seconds = Math.max(0, Math.ceil(remaining));
+        const label = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+        time.textContent = label; time.setAttribute('aria-label', `${Math.floor(seconds / 60)} minutes and ${seconds % 60} seconds remaining`);
+        document.title = running ? `${label} · ${mode === 'focus' ? 'Focus' : 'Break'} — Still` : 'Still — a little space to focus';
+        dial.style.background = `conic-gradient(${mode === 'focus' ? '#81a586' : '#baa2d0'} ${Math.max(0, Math.min(360, (1 - remaining / full) * 360))}deg, #edf1eb 0deg)`;
+        $('sessionLabel').textContent = mode === 'focus' ? 'Focus session' : 'Short break';
+        $('state').textContent = running ? (mode === 'focus' ? 'Stay with it' : 'Take a breath') : remaining < full ? 'Paused' : 'Ready when you are';
+        $('start').textContent = running ? 'Pause' : remaining < full ? 'Continue' : mode === 'focus' ? 'Start focus' : 'Start break';
+        $('sessionCount').textContent = `${sessions} focus session${sessions === 1 ? '' : 's'} completed`;
+        for (const kind of ['focus', 'break']) { $(kind + 'Tab').classList.toggle('active', kind === mode); $(kind + 'Tab').setAttribute('aria-pressed', String(kind === mode)); }
+      }
+      function pause() { if (running) { remaining = Math.max(0, (deadline - Date.now()) / 1000); running = false; clearInterval(ticker); ticker = null; render(); } }
+      function nudge(message) { toast(message); if (notify && Notification.permission === 'granted') { try { new Notification('Still', { body: message }); } catch {} } }
+      function finish() {
+        clearInterval(ticker); ticker = null; running = false;
+        if (mode === 'focus') { sessions++; mode = 'break'; remaining = lengths.break * 60; save(); nudge('Nice work. Time for a short break.'); }
+        else { mode = 'focus'; remaining = lengths.focus * 60; nudge('Break is over. Ready for another focus session?'); }
+        render();
+      }
+      function tick() { remaining = Math.max(0, (deadline - Date.now()) / 1000); if (remaining <= 0) finish(); else render(); }
+      $('start').addEventListener('click', () => { if (running) { pause(); return; } running = true; deadline = Date.now() + remaining * 1000; ticker = setInterval(tick, 250); render(); });
+      $('reset').addEventListener('click', () => { pause(); remaining = lengths[mode] * 60; render(); });
+      for (const kind of ['focus', 'break']) $(kind + 'Tab').addEventListener('click', () => { if (kind === mode) return; pause(); mode = kind; remaining = lengths[mode] * 60; render(); });
+      function updateLength(kind, input, min, max) {
+        const n = clamp(input.value, min, max, lengths[kind]); input.value = n;
+        if (n === lengths[kind]) return;
+        if (mode === kind) { pause(); remaining = n * 60; }
+        lengths[kind] = n; save(); render();
+      }
+      focusInput.addEventListener('change', () => updateLength('focus', focusInput, 1, 180));
+      breakInput.addEventListener('change', () => updateLength('break', breakInput, 1, 60));
+      $('notifications').addEventListener('click', async () => {
+        if (notify) { notify = false; toast('Desktop notifications turned off.'); }
+        else if (!('Notification' in window)) toast('This browser does not support desktop notifications.');
+        else { const permission = await Notification.requestPermission(); notify = permission === 'granted'; toast(notify ? 'Desktop notifications turned on.' : 'Notifications were not enabled.'); }
+        $('notifications').setAttribute('aria-checked', String(notify)); save();
+      });
+      document.addEventListener('visibilitychange', () => { if (running) tick(); });
+      render();
+    })();
+  </script>
+</body>
+</html>
